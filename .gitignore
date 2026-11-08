@@ -1,0 +1,21 @@
+# Personal settings and secrets: never upload
+.env
+
+# Personal files (notes and assistant instructions)
+CLAUDE.md
+jarvis/my_notes.txt
+.vscode/
+
+# Your own practice attempts outside the generated notebooks
+*/window_functions/
+
+# Generated / temporary files
+tmp/
+tools/.cache/
+__pycache__/
+.ipynb_checkpoints/
+spark-warehouse/
+metastore_db/
+derby.log
+.DS_Store
+.venv/

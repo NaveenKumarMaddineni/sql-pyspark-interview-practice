@@ -1,0 +1,21 @@
+product_id	product_name	category	price
+1	Wireless Mouse	Electronics	25.00
+2	USB-C Cable	Electronics	12.00
+3	Bluetooth Speaker	Electronics	60.00
+4	Laptop Stand	Electronics	45.00
+5	Webcam	Electronics	60.00
+6	Headphones	Electronics	120.00
+7	SQL Basics	Books	30.00
+8	Data Engineering 101	Books	45.00
+9	Python Cookbook	Books	40.00
+10	Statistics Made Easy	Books	30.00
+11	Coffee Mug	Home	10.00
+12	Desk Lamp	Home	35.00
+13	Water Bottle	Home	15.00
+14	Notebook Pack	Home	12.00
+15	T-Shirt	Clothing	20.00
+16	Hoodie	Clothing	50.00
+17	Cap	Clothing	15.00
+18	Socks Pack	Clothing	10.00
+19	Yoga Mat	Sports	30.00
+20	Dumbbell Set	Sports	90.00
