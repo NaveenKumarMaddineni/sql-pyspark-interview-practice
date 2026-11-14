@@ -200,7 +200,7 @@ res = (j.withColumn("issue",
 SELECT MAX(order_date) AS latest_order_date,
        DATE_DIFF(DATE '2025-12-31', MAX(order_date), DAY) AS days_behind,
        CASE WHEN DATE_DIFF(DATE '2025-12-31', MAX(order_date), DAY) > 2 THEN 'STALE' ELSE 'FRESH' END AS status
-FROM shield.orders""",
+FROM practice.orders""",
           ora="""
 SELECT MAX(order_date) AS latest_order_date,
        DATE '2025-12-31' - MAX(order_date) AS days_behind,

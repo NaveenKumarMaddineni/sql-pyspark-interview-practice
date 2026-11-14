@@ -3,8 +3,8 @@
 
 # Personal files (notes and assistant instructions)
 CLAUDE.md
-jarvis/my_notes.txt
-jarvis/resume_review.md
+cheatsheets/my_notes.txt
+cheatsheets/resume_review.md
 .vscode/
 
 # Your own practice attempts outside the generated notebooks

@@ -14,10 +14,10 @@ In a notebook:
     %load_ext bq_helper
 
     %%bigquery
-    SELECT * FROM shield.employees LIMIT 5
+    SELECT * FROM practice.employees LIMIT 5
 
     %%bigquery dry
-    SELECT * FROM shield.orders        -- only shows how much data it WOULD read (free)
+    SELECT * FROM practice.orders        -- only shows how much data it WOULD read (free)
 
 Every query prints how much data it read (BigQuery charges by bytes read).
 """
@@ -39,7 +39,7 @@ warnings.filterwarnings("ignore", message=".*DataFrames via google-cloud-bigquer
 warnings.filterwarnings("ignore", message=".*BigQuery Storage module not found.*")
 
 PROJECT = settings.get("BQ_PROJECT")
-DATASET = settings.get("BQ_DATASET", "shield")
+DATASET = settings.get("BQ_DATASET", "practice")
 LOCATION = settings.get("BQ_LOCATION", "US")
 GCLOUD_CONFIG = settings.get("BQ_GCLOUD_CONFIG")
 

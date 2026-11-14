@@ -3,7 +3,7 @@ oracle_helper.py - run Oracle queries from Python or a Jupyter notebook.
 
 Settings come from the .env file in the repo root (see .env.example):
   ORACLE_DSN   e.g. localhost:1521/FREEPDB1   (host:port/service_name)
-  ORACLE_USER  e.g. shield
+  ORACLE_USER  e.g. practice
   password: ORACLE_PASSWORD, or ORACLE_KEYCHAIN_ITEM (macOS Keychain),
             or you are asked to type it.
 
@@ -30,7 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import settings  # noqa: E402
 
 DSN = settings.get("ORACLE_DSN", "localhost:1521/FREEPDB1")
-USER = settings.get("ORACLE_USER", "shield")
+USER = settings.get("ORACLE_USER", "practice")
 _conn = None
 _typed_password = None
 

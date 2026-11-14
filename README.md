@@ -40,10 +40,10 @@ The data is tiny on purpose: you learn the logic and the traps, not wait for big
 
 Solutions: same file names under [`solutions/`](solutions/), e.g. `solutions/bigquery/05_window_functions.ipynb`.
 
-**Cheatsheets** (in [`jarvis/`](jarvis/)):
-- [`interview_cheatsheet.md`](jarvis/interview_cheatsheet.md): a short review for the 30 minutes before an interview
-- [`sql_cheatsheet.md`](jarvis/sql_cheatsheet.md): a longer reference with tested syntax for all 3 engines
-- [`tables_guide.md`](jarvis/tables_guide.md): the 7 tables, their columns, and their traps
+**Cheatsheets** (in [`cheatsheets/`](cheatsheets/)):
+- [`interview_cheatsheet.md`](cheatsheets/interview_cheatsheet.md): a short review for the 30 minutes before an interview
+- [`sql_cheatsheet.md`](cheatsheets/sql_cheatsheet.md): a longer reference with tested syntax for all 3 engines
+- [`tables_guide.md`](cheatsheets/tables_guide.md): the 7 tables, their columns, and their traps
 
 ## The practice tables
 
@@ -66,7 +66,7 @@ bigquery/   bq_helper.py (%%bigquery magic), load_tables.py, practice/
 oracle/     oracle_helper.py (%%oracle magic), create_tables.sql, load_tables.py, practice/
 spark/      spark_setup.py (get_spark, load_tables, %%sql magic), examples/, practice/
 solutions/  bigquery/ · oracle/ · spark/      (answers, outputs, explanations)
-jarvis/     cheatsheets and the tables guide
+cheatsheets/ cheatsheets and the tables guide
 data/       the 7 tables as .tsv
 tools/      build.py + problems/*.py: the source of all notebooks (see "Add or change a question")
 settings.py reads your .env file
@@ -124,19 +124,19 @@ colima start --cpu 4 --memory 4
 # Create the database. Choose your own passwords.
 docker run -d --name oracle -p 1521:1521 \
   -e ORACLE_PASSWORD='<admin-password>' \
-  -e APP_USER=shield -e APP_USER_PASSWORD='<shield-password>' \
+  -e APP_USER=practice -e APP_USER_PASSWORD='<practice-password>' \
   -v oracle-data:/opt/oracle/oradata \
   gvenzl/oracle-free:23
 
 docker logs -f oracle              # wait for "DATABASE IS READY TO USE!", then Ctrl+C
 ```
 
-`APP_USER` creates the user `shield` (in Oracle a user and its schema share the name: a schema is the set of
+`APP_USER` creates the user `practice` (in Oracle a user and its schema share the name: a schema is the set of
 tables a user owns). Put its password in `.env` (`ORACLE_PASSWORD=...`), or on macOS keep it in the Keychain:
 
 ```bash
-security add-generic-password -s oracle-shield -a oracle-shield -w '<shield-password>'
-# then in .env:  ORACLE_KEYCHAIN_ITEM=oracle-shield   (and remove ORACLE_PASSWORD)
+security add-generic-password -s oracle-practice -a oracle-practice -w '<practice-password>'
+# then in .env:  ORACLE_KEYCHAIN_ITEM=oracle-practice   (and remove ORACLE_PASSWORD)
 ```
 
 Load the tables (rerun any time to reset them):
@@ -147,7 +147,7 @@ python3 oracle/load_tables.py
 
 Later: `docker stop oracle` / `docker start oracle` (with Colima: `colima stop` frees the memory).
 The data stays in the `oracle-data` volume. You can also connect with the **Oracle SQL Developer** extension
-for VS Code: host `localhost`, port `1521`, service name `FREEPDB1`, user `shield`.
+for VS Code: host `localhost`, port `1521`, service name `FREEPDB1`, user `practice`.
 
 ### 5. BigQuery (Google Cloud)
 
@@ -160,8 +160,8 @@ for VS Code: host `localhost`, port `1521`, service name `FREEPDB1`, user `shiel
    ```
    (If you use several Google accounts, make a named configuration with `gcloud config configurations create ...`
    and set `BQ_GCLOUD_CONFIG` in `.env`.)
-3. Fill in `.env`: `BQ_PROJECT=<your project id>`, `BQ_DATASET=shield`, `BQ_LOCATION=US` (or `EU`, `europe-west2`...).
-   The notebooks write tables as `shield.<table>`, so keep the dataset name `shield`.
+3. Fill in `.env`: `BQ_PROJECT=<your project id>`, `BQ_DATASET=practice`, `BQ_LOCATION=US` (or `EU`, `europe-west2`...).
+   The notebooks write tables as `practice.<table>`, so keep the dataset name `practice`.
 4. Create the dataset and load the tables (free load jobs):
    ```bash
    python3 bigquery/load_tables.py

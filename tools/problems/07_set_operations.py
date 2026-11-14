@@ -1,5 +1,5 @@
 def yr(y, bq=False):
-    t = "shield.orders" if bq else "orders"
+    t = "practice.orders" if bq else "orders"
     return f"SELECT customer_id FROM {t} WHERE EXTRACT(YEAR FROM order_date) = {y}"
 
 
@@ -73,10 +73,10 @@ res = y(2024).subtract(y(2025))""",
           "Show each `user_id` that logged in during January 2025 but **not** during February 2025.",
           level="medium",
           bq="""
-SELECT user_id FROM shield.user_logins
+SELECT user_id FROM practice.user_logins
 WHERE login_date >= DATE '2025-01-01' AND login_date < DATE '2025-02-01'
 EXCEPT DISTINCT
-SELECT user_id FROM shield.user_logins
+SELECT user_id FROM practice.user_logins
 WHERE login_date >= DATE '2025-02-01' AND login_date < DATE '2025-03-01'""",
           ora="""
 SELECT user_id FROM user_logins
@@ -102,11 +102,11 @@ res = jan.select("user_id").subtract(feb.select("user_id"))""",
           level="medium",
           bq="""
 SELECT status, COUNT(DISTINCT order_id) AS num_orders
-FROM shield.orders
+FROM practice.orders
 GROUP BY status
 UNION ALL
 SELECT 'TOTAL', COUNT(DISTINCT order_id)
-FROM shield.orders""",
+FROM practice.orders""",
           ora="""
 SELECT status, COUNT(DISTINCT order_id) AS num_orders
 FROM orders
@@ -135,8 +135,8 @@ res = by_status.unionByName(total)""",
           level="hard",
           bq="""
 WITH raw AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY order_id, customer_id, order_date, amount, status) AS copy_no
-             FROM shield.orders),
-clean AS (SELECT *, 1 AS copy_no FROM (SELECT DISTINCT * FROM shield.orders))
+             FROM practice.orders),
+clean AS (SELECT *, 1 AS copy_no FROM (SELECT DISTINCT * FROM practice.orders))
 SELECT
   (SELECT COUNT(*) FROM (SELECT * FROM raw   EXCEPT DISTINCT SELECT * FROM clean)) AS only_in_raw,
   (SELECT COUNT(*) FROM (SELECT * FROM clean EXCEPT DISTINCT SELECT * FROM raw))   AS only_in_clean""",
@@ -167,10 +167,10 @@ res = spark.createDataFrame([(orders.exceptAll(clean).count(), clean.exceptAll(o
           level="medium",
           bq="""
 SELECT 'sold' AS status, COUNT(*) AS num_products
-FROM shield.products WHERE product_id IN (SELECT product_id FROM shield.order_items)
+FROM practice.products WHERE product_id IN (SELECT product_id FROM practice.order_items)
 UNION ALL
 SELECT 'never sold', COUNT(*)
-FROM shield.products WHERE product_id NOT IN (SELECT product_id FROM shield.order_items)""",
+FROM practice.products WHERE product_id NOT IN (SELECT product_id FROM practice.order_items)""",
           ora="""
 SELECT 'sold' AS status, COUNT(*) AS num_products
 FROM products WHERE product_id IN (SELECT product_id FROM order_items)

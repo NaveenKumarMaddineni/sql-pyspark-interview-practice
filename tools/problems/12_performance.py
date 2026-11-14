@@ -20,23 +20,23 @@ The tables here are tiny, so speed differences are small. Learn to **read** the 
           "Use `%%bigquery dry` (free) to see how many bytes these read: (1) `SELECT *` from orders, "
           "(2) only `order_id, amount`, (3) `SELECT *` with `LIMIT 5`.",
           level="easy", compare=False, ora=S, ssql=S,
-          bq=["%%bigquery dry\nSELECT * FROM shield.orders",
-              "%%bigquery dry\nSELECT order_id, amount FROM shield.orders",
-              "%%bigquery dry\nSELECT * FROM shield.orders LIMIT 5"],
+          bq=["%%bigquery dry\nSELECT * FROM practice.orders",
+              "%%bigquery dry\nSELECT order_id, amount FROM practice.orders",
+              "%%bigquery dry\nSELECT * FROM practice.orders LIMIT 5"],
           note="Fewer columns = fewer bytes. **LIMIT does not reduce the bytes billed**: BigQuery still reads "
                "the whole columns. (Every query is billed at least 10 MB.)"),
 
         Q("Create a partitioned and clustered table",
-          "Create `shield.prac_orders_part` from the clean orders, **partitioned by month** of order_date and "
+          "Create `practice.prac_orders_part` from the clean orders, **partitioned by month** of order_date and "
           "**clustered by** customer_id. Then list its first partitions from `INFORMATION_SCHEMA.PARTITIONS`.",
           level="medium", compare=False, ora=S, ssql=S,
           bq=["""
-CREATE OR REPLACE TABLE shield.prac_orders_part
+CREATE OR REPLACE TABLE practice.prac_orders_part
 PARTITION BY DATE_TRUNC(order_date, MONTH)
 CLUSTER BY customer_id
-AS SELECT DISTINCT * FROM shield.orders""", """
+AS SELECT DISTINCT * FROM practice.orders""", """
 SELECT partition_id, total_rows
-FROM shield.INFORMATION_SCHEMA.PARTITIONS
+FROM practice.INFORMATION_SCHEMA.PARTITIONS
 WHERE table_name = 'prac_orders_part'
 ORDER BY partition_id
 LIMIT 6"""],
@@ -48,10 +48,10 @@ LIMIT 6"""],
           "Dry-run 3 filters on `prac_orders_part` and compare the bytes: (1) no filter, "
           "(2) `order_date` between 2025-10-01 and 2025-10-31, (3) `EXTRACT(YEAR FROM order_date) = 2025`.",
           level="medium", compare=False, ora=S, ssql=S,
-          bq=["%%bigquery dry\nSELECT order_id, amount FROM shield.prac_orders_part",
-              "%%bigquery dry\nSELECT order_id, amount FROM shield.prac_orders_part\n"
+          bq=["%%bigquery dry\nSELECT order_id, amount FROM practice.prac_orders_part",
+              "%%bigquery dry\nSELECT order_id, amount FROM practice.prac_orders_part\n"
               "WHERE order_date BETWEEN DATE '2025-10-01' AND DATE '2025-10-31'",
-              "%%bigquery dry\nSELECT order_id, amount FROM shield.prac_orders_part\n"
+              "%%bigquery dry\nSELECT order_id, amount FROM practice.prac_orders_part\n"
               "WHERE EXTRACT(YEAR FROM order_date) = 2025"],
           note="**Partition pruning** = skipping partitions that cannot match. A plain range on the partition "
                "column prunes. Wrapping the column in a function may stop pruning. For safety on big tables "
@@ -64,7 +64,7 @@ LIMIT 6"""],
           bq="""
 SELECT COUNT(DISTINCT customer_id)        AS exact_customers,
        APPROX_COUNT_DISTINCT(customer_id) AS approx_customers
-FROM shield.orders""",
+FROM practice.orders""",
           note="On billions of rows the approximate version (HyperLogLog++) is much faster and uses little "
                "memory, with ~1% error. Same idea: Oracle `APPROX_COUNT_DISTINCT`, Spark `approx_count_distinct`."),
 

@@ -21,7 +21,7 @@ SELECT name,
        EXTRACT(YEAR FROM hire_date)          AS hire_year,
        EXTRACT(MONTH FROM hire_date)         AS hire_month,
        UPPER(FORMAT_DATE('%a', hire_date))   AS hire_weekday
-FROM shield.employees""",
+FROM practice.employees""",
           ora="""
 SELECT name,
        EXTRACT(YEAR FROM hire_date)  AS hire_year,
@@ -51,7 +51,7 @@ SELECT name, hire_date,
        DIV(DATE_DIFF(DATE '2025-06-30', hire_date, MONTH)
            - IF(EXTRACT(DAY FROM DATE '2025-06-30') < EXTRACT(DAY FROM hire_date), 1, 0), 12)
          AS years_of_service
-FROM shield.employees""",
+FROM practice.employees""",
           ora="""
 SELECT name, hire_date,
        FLOOR(MONTHS_BETWEEN(DATE '2025-06-30', hire_date) / 12) AS years_of_service
@@ -77,7 +77,7 @@ res = employees.select("name", "hire_date",
 SELECT DISTINCT order_id, order_date,
        DATE_ADD(order_date, INTERVAL 7 DAY) AS due_date,
        LAST_DAY(order_date)                 AS month_end
-FROM shield.orders
+FROM practice.orders
 WHERE order_id BETWEEN 1001 AND 1005
 ORDER BY order_id""",
           ora="""
@@ -110,7 +110,7 @@ res = (orders.filter(F.col("order_id").between(1001, 1005))
           bq="""
 SELECT UPPER(FORMAT_DATE('%a', order_date)) AS weekday,
        COUNT(DISTINCT order_id)             AS num_orders
-FROM shield.orders
+FROM practice.orders
 GROUP BY weekday
 ORDER BY num_orders DESC, weekday""",
           ora="""
@@ -139,7 +139,7 @@ res = (orders.groupBy(F.upper(F.date_format("order_date", "EEE")).alias("weekday
           level="easy",
           bq="""
 SELECT customer_id, name, signup_date
-FROM shield.customers
+FROM practice.customers
 WHERE signup_date >  DATE_SUB(DATE '2024-11-30', INTERVAL 90 DAY)
   AND signup_date <= DATE '2024-11-30'""",
           ora="""
@@ -166,7 +166,7 @@ res = (customers.filter((F.col("signup_date") > F.date_sub(end, 90)) & (F.col("s
 SELECT name,
        SPLIT(name, ' ')[OFFSET(0)] AS first_name,
        SPLIT(name, ' ')[OFFSET(1)] AS last_name
-FROM shield.employees""",
+FROM practice.employees""",
           ora="""
 SELECT name,
        SUBSTR(name, 1, INSTR(name, ' ') - 1) AS first_name,
@@ -192,7 +192,7 @@ SELECT name,
        SUBSTR(name, 1, 1) || '.' || SUBSTR(SPLIT(name, ' ')[OFFSET(1)], 1, 1) || '.' AS initials,
        UPPER(name)  AS name_upper,
        LENGTH(name) AS name_length
-FROM shield.customers
+FROM practice.customers
 WHERE customer_id <= 5
 ORDER BY customer_id""",
           ora="""
@@ -225,7 +225,7 @@ res = (customers.filter("customer_id <= 5").orderBy("customer_id")
           level="easy",
           bq="""
 SELECT emp_id, name, 'E' || LPAD(CAST(emp_id AS STRING), 4, '0') AS emp_code
-FROM shield.employees""",
+FROM practice.employees""",
           ora="""
 SELECT emp_id, name, 'E' || LPAD(emp_id, 4, '0') AS emp_code
 FROM employees""",
@@ -244,7 +244,7 @@ res = employees.select("emp_id", "name",
           level="medium",
           bq="""
 SELECT product_name
-FROM shield.products
+FROM practice.products
 WHERE REGEXP_CONTAINS(product_name, r'[0-9]|Pack')""",
           ora="""
 SELECT product_name
@@ -265,7 +265,7 @@ res = products.filter(F.col("product_name").rlike("[0-9]|Pack")).select("product
           level="medium",
           bq="""
 SELECT dept_id, STRING_AGG(name, ', ' ORDER BY name) AS members
-FROM shield.employees
+FROM practice.employees
 WHERE dept_id IS NOT NULL
 GROUP BY dept_id
 ORDER BY dept_id""",
@@ -296,7 +296,7 @@ res = (employees.filter(F.col("dept_id").isNotNull())
           level="easy",
           bq="""
 SELECT DISTINCT order_id, FORMAT_DATE('%d/%m/%Y', order_date) AS order_date_text
-FROM shield.orders
+FROM practice.orders
 WHERE order_id <= 1003
 ORDER BY order_id""",
           ora="""
@@ -344,7 +344,7 @@ res = spark.range(1).select(F.to_timestamp(F.lit("2024-03-15 14:30:00"), "yyyy-M
           level="medium",
           bq="""
 SELECT DATE_TRUNC(login_date, ISOWEEK) AS week_start, COUNT(*) AS num_logins
-FROM shield.user_logins
+FROM practice.user_logins
 GROUP BY week_start
 ORDER BY week_start""",
           ora="""

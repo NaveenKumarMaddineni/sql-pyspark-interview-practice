@@ -1,7 +1,7 @@
 MONTHLY_BQ = """
 WITH monthly AS (
     SELECT DATE_TRUNC(order_date, MONTH) AS month, SUM(amount) AS revenue
-    FROM (SELECT DISTINCT order_id, order_date, amount, status FROM shield.orders) o
+    FROM (SELECT DISTINCT order_id, order_date, amount, status FROM practice.orders) o
     WHERE status = 'completed'
     GROUP BY DATE_TRUNC(order_date, MONTH)
 )"""
@@ -76,7 +76,7 @@ WHERE drnk <= 2
 ORDER BY dept_id, salary DESC, name""",
           bq="""
 SELECT dept_id, name, salary
-FROM shield.employees
+FROM practice.employees
 WHERE dept_id IS NOT NULL
 QUALIFY DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) <= 2
 ORDER BY dept_id, salary DESC, name""",
@@ -177,7 +177,7 @@ SELECT customer_id, order_id, order_date,
        DATE_DIFF(order_date,
                  LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date, order_id),
                  DAY) AS days_since_prev
-FROM (SELECT DISTINCT order_id, customer_id, order_date FROM shield.orders)""",
+FROM (SELECT DISTINCT order_id, customer_id, order_date FROM practice.orders)""",
           ora="""
 SELECT customer_id, order_id, order_date,
        LAG(order_date) OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS prev_order_date,
@@ -309,7 +309,7 @@ FROM (SELECT o.*,
 WHERE rn = 1""",
           bq="""
 SELECT customer_id, order_id, order_date, amount
-FROM shield.orders
+FROM practice.orders
 WHERE TRUE
 QUALIFY ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC) = 1""",
           sdf="""

@@ -88,7 +88,7 @@ res = orders.withColumn("rn", F.row_number().over(w)).filter("rn = 1").drop("rn"
           level="hard",
           hint="Number each user's days 1, 2, 3... with ROW_NUMBER. `login_date - rn` stays the **same** "
                "inside a run of consecutive days. Group by it.",
-          bq=streak("DATE_SUB(login_date, INTERVAL rn DAY)").replace("FROM user_logins", "FROM shield.user_logins"),
+          bq=streak("DATE_SUB(login_date, INTERVAL rn DAY)").replace("FROM user_logins", "FROM practice.user_logins"),
           ora=streak("login_date - rn"),
           ssql=streak("DATE_SUB(login_date, rn)"),
           sdf="""
@@ -110,7 +110,7 @@ res = (user_logins.dropDuplicates()
           "Show `user_id` and `longest_streak` (days) for every user who logged in.",
           level="hard",
           bq="""
-WITH days AS (SELECT DISTINCT user_id, login_date FROM shield.user_logins),
+WITH days AS (SELECT DISTINCT user_id, login_date FROM practice.user_logins),
 grouped AS (
     SELECT user_id,
            DATE_SUB(login_date, INTERVAL ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY login_date) DAY) AS grp
@@ -163,7 +163,7 @@ res = (user_logins.dropDuplicates()
           "`next_login` (day after the gap), `days_missed`. Only gaps where at least 1 day was missed.",
           level="medium",
           bq="""
-WITH days AS (SELECT DISTINCT user_id, login_date FROM shield.user_logins),
+WITH days AS (SELECT DISTINCT user_id, login_date FROM practice.user_logins),
 nxt AS (
     SELECT user_id, login_date AS last_login,
            LEAD(login_date) OVER (PARTITION BY user_id ORDER BY login_date) AS next_login
@@ -263,7 +263,7 @@ ORDER BY category""",
           bq="""
 SELECT DISTINCT dept_id,
        PERCENTILE_CONT(salary, 0.5) OVER (PARTITION BY dept_id) AS median_salary
-FROM shield.employees
+FROM practice.employees
 WHERE dept_id IS NOT NULL
 ORDER BY dept_id""",
           ora="""
@@ -296,7 +296,7 @@ res = (employees.filter(F.col("dept_id").isNotNull())
           bq="""
 SELECT d AS login_date, COUNT(l.user_id) AS num_logins
 FROM UNNEST(GENERATE_DATE_ARRAY(DATE '2025-01-01', DATE '2025-01-31')) AS d
-LEFT JOIN shield.user_logins l
+LEFT JOIN practice.user_logins l
        ON l.login_date = d AND l.user_id = 1
 GROUP BY d
 ORDER BY d""",

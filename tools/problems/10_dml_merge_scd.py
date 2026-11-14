@@ -1,12 +1,12 @@
 def two(sql):
-    """Same statement for BigQuery (with shield.) and Oracle. {d} = dataset prefix."""
-    return sql.replace("{d}", "shield."), sql.replace("{d}", "")
+    """Same statement for BigQuery (with practice.) and Oracle. {d} = dataset prefix."""
+    return sql.replace("{d}", "practice."), sql.replace("{d}", "")
 
 
 def copy_of(table, src, bq_select=None, ora_select=None):
-    sel = bq_select or f"SELECT * FROM shield.{src}"
+    sel = bq_select or f"SELECT * FROM practice.{src}"
     osel = ora_select or f"SELECT * FROM {src}"
-    return {"bigquery": [f"CREATE OR REPLACE TABLE shield.{table} AS\n{sel}"],
+    return {"bigquery": [f"CREATE OR REPLACE TABLE practice.{table} AS\n{sel}"],
             "oracle": [f"DROP TABLE IF EXISTS {table} PURGE", f"CREATE TABLE {table} AS\n{osel}"]}
 
 
@@ -22,9 +22,9 @@ CUST = copy_of("prac_customers", "customers")
 
 UPDATES = {
     "bigquery": ["""
-CREATE OR REPLACE TABLE shield.prac_customer_updates (
+CREATE OR REPLACE TABLE practice.prac_customer_updates (
     customer_id INT64, name STRING, city STRING, signup_date DATE)""", """
-INSERT INTO shield.prac_customer_updates VALUES
+INSERT INTO practice.prac_customer_updates VALUES
     (1,  'Aarav Nguyen',    'Denver',  DATE '2023-01-26'),
     (2,  'Priya Silva-Rao', 'Seattle', DATE '2023-09-08'),
     (41, 'Nina Patel',      'Boston',  DATE '2024-12-05'),
@@ -49,12 +49,12 @@ updates = spark.createDataFrame(
 DIM = copy_of(
     "prac_dim_customer", "customers",
     bq_select="SELECT customer_id, city, signup_date AS valid_from,\n"
-              "       DATE '9999-12-31' AS valid_to, 'Y' AS is_current\nFROM shield.customers",
+              "       DATE '9999-12-31' AS valid_to, 'Y' AS is_current\nFROM practice.customers",
     ora_select="SELECT customer_id, city, signup_date AS valid_from,\n"
                "       DATE '9999-12-31' AS valid_to, CAST('Y' AS VARCHAR2(1)) AS is_current\nFROM customers")
 CHANGES = {
     "bigquery": ["""
-CREATE OR REPLACE TABLE shield.prac_city_changes AS
+CREATE OR REPLACE TABLE practice.prac_city_changes AS
 SELECT 1 AS customer_id, 'Denver' AS city UNION ALL
 SELECT 3, 'Phoenix' UNION ALL      -- same city as now: NOT a change
 SELECT 13, 'Austin'                -- old city is NULL"""],
@@ -113,9 +113,9 @@ Data engineering words used here:
           level="easy",
           setup=CUST,
           bq=["""
-INSERT INTO shield.prac_customers (customer_id, name, city, signup_date)
+INSERT INTO practice.prac_customers (customer_id, name, city, signup_date)
 VALUES (41, 'Test User', 'Austin', DATE '2024-12-01')""",
-              "SELECT COUNT(*) AS num_customers FROM shield.prac_customers"],
+              "SELECT COUNT(*) AS num_customers FROM practice.prac_customers"],
           ora=["""
 INSERT INTO prac_customers (customer_id, name, city, signup_date)
 VALUES (41, 'Test User', 'Austin', DATE '2024-12-01')""",
@@ -139,8 +139,8 @@ res = prac_customers.agg(F.count("*").alias("num_customers"))""",
           "Then show `customer_id`, `name`, `city` of the changed rows.",
           level="easy",
           setup=CUST,
-          bq=["UPDATE shield.prac_customers SET city = 'Unknown' WHERE city IS NULL",
-              "SELECT customer_id, name, city FROM shield.prac_customers WHERE city = 'Unknown'"],
+          bq=["UPDATE practice.prac_customers SET city = 'Unknown' WHERE city IS NULL",
+              "SELECT customer_id, name, city FROM practice.prac_customers WHERE city = 'Unknown'"],
           ora=["UPDATE prac_customers SET city = 'Unknown' WHERE city IS NULL",
                "SELECT customer_id, name, city FROM prac_customers WHERE city = 'Unknown'"],
           ssql="SKIP",
@@ -155,9 +155,9 @@ res = prac_customers.filter("city = 'Unknown'").select("customer_id", "name", "c
           level="easy",
           setup=CUST,
           bq=["""
-DELETE FROM shield.prac_customers c
-WHERE NOT EXISTS (SELECT 1 FROM shield.orders o WHERE o.customer_id = c.customer_id)""",
-              "SELECT COUNT(*) AS num_customers FROM shield.prac_customers"],
+DELETE FROM practice.prac_customers c
+WHERE NOT EXISTS (SELECT 1 FROM practice.orders o WHERE o.customer_id = c.customer_id)""",
+              "SELECT COUNT(*) AS num_customers FROM practice.prac_customers"],
           ora=["""
 DELETE FROM prac_customers c
 WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id)""",
@@ -175,15 +175,15 @@ res = prac_customers.agg(F.count("*").alias("num_customers"))""",
           level="medium",
           setup=merge_setups(CUST, UPDATES),
           bq=["""
-MERGE shield.prac_customers t
-USING shield.prac_customer_updates s
+MERGE practice.prac_customers t
+USING practice.prac_customer_updates s
 ON t.customer_id = s.customer_id
 WHEN MATCHED THEN
   UPDATE SET name = s.name, city = s.city
 WHEN NOT MATCHED THEN
   INSERT (customer_id, name, city, signup_date)
   VALUES (s.customer_id, s.name, s.city, s.signup_date)""", """
-SELECT * FROM shield.prac_customers
+SELECT * FROM practice.prac_customers
 WHERE customer_id IN (1, 2, 41, 42)
 ORDER BY customer_id"""],
           ora=["""
@@ -218,14 +218,14 @@ res = prac_customers.filter(F.col("customer_id").isin(1, 2, 41, 42)).orderBy("cu
           level="medium",
           setup=copy_of("prac_orders", "orders"),
           bq=["""
-DELETE FROM shield.prac_orders
+DELETE FROM practice.prac_orders
 WHERE order_date >= DATE '2025-10-01' AND order_date < DATE '2025-11-01'""", """
-INSERT INTO shield.prac_orders (order_id, customer_id, order_date, amount, status)
+INSERT INTO practice.prac_orders (order_id, customer_id, order_date, amount, status)
 SELECT DISTINCT order_id, customer_id, order_date, amount, status
-FROM shield.orders
+FROM practice.orders
 WHERE order_date >= DATE '2025-10-01' AND order_date < DATE '2025-11-01'""", """
 SELECT COUNT(*) AS oct_rows, COUNT(DISTINCT order_id) AS oct_orders
-FROM shield.prac_orders
+FROM practice.prac_orders
 WHERE order_date >= DATE '2025-10-01' AND order_date < DATE '2025-11-01'"""],
           ora=["""
 DELETE FROM prac_orders
@@ -256,14 +256,14 @@ res = prac_orders.filter(in_oct).agg(F.count("*").alias("oct_rows"),
           "latest date already in the target** (the watermark). Then show `num_rows` and `max_date` of the target.",
           level="medium",
           setup=copy_of("prac_orders_target", "orders",
-                        bq_select="SELECT DISTINCT * FROM shield.orders WHERE order_date <= DATE '2025-06-30'",
+                        bq_select="SELECT DISTINCT * FROM practice.orders WHERE order_date <= DATE '2025-06-30'",
                         ora_select="SELECT DISTINCT * FROM orders WHERE order_date <= DATE '2025-06-30'"),
           bq=["""
-INSERT INTO shield.prac_orders_target (order_id, customer_id, order_date, amount, status)
+INSERT INTO practice.prac_orders_target (order_id, customer_id, order_date, amount, status)
 SELECT DISTINCT order_id, customer_id, order_date, amount, status
-FROM shield.orders
-WHERE order_date > (SELECT MAX(order_date) FROM shield.prac_orders_target)""",
-              "SELECT COUNT(*) AS num_rows, MAX(order_date) AS max_date FROM shield.prac_orders_target"],
+FROM practice.orders
+WHERE order_date > (SELECT MAX(order_date) FROM practice.prac_orders_target)""",
+              "SELECT COUNT(*) AS num_rows, MAX(order_date) AS max_date FROM practice.prac_orders_target"],
           ora=["""
 INSERT INTO prac_orders_target (order_id, customer_id, order_date, amount, status)
 SELECT DISTINCT order_id, customer_id, order_date, amount, status
@@ -319,13 +319,13 @@ res = dim.filter(F.col("customer_id").isin(1, 3, 13)).orderBy("customer_id", "va
           "least one order, `N` for the rest. Show `is_active` and `num_customers`.",
           level="medium",
           setup=CUST,
-          bq=["ALTER TABLE shield.prac_customers ADD COLUMN is_active STRING", """
-UPDATE shield.prac_customers c
-SET is_active = CASE WHEN EXISTS (SELECT 1 FROM shield.orders o WHERE o.customer_id = c.customer_id)
+          bq=["ALTER TABLE practice.prac_customers ADD COLUMN is_active STRING", """
+UPDATE practice.prac_customers c
+SET is_active = CASE WHEN EXISTS (SELECT 1 FROM practice.orders o WHERE o.customer_id = c.customer_id)
                      THEN 'Y' ELSE 'N' END
 WHERE TRUE""", """
 SELECT is_active, COUNT(*) AS num_customers
-FROM shield.prac_customers
+FROM practice.prac_customers
 GROUP BY is_active
 ORDER BY is_active"""],
           ora=["ALTER TABLE prac_customers ADD (is_active VARCHAR2(1))", """

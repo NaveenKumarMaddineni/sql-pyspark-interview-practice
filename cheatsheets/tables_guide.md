@@ -1,6 +1,6 @@
 # Practice tables — quick reference
 
-Same 7 tables in **BigQuery** (`shield.<table>`), **Oracle** and **Spark**.
+Same 7 tables in **BigQuery** (`practice.<table>`), **Oracle** and **Spark**.
 Keep this open on the side: right-click this tab → **Split Right** (or press `Cmd+\`).
 
 ## How they connect
@@ -82,6 +82,6 @@ customers ──< orders ──< order_items >── products
 ## See the schema with SQL
 | Tool | Command |
 |---|---|
-| BigQuery | `SELECT column_name, data_type FROM shield.INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'employees'` |
+| BigQuery | `SELECT column_name, data_type FROM practice.INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'employees'` |
 | Oracle | `SELECT column_name, data_type FROM user_tab_columns WHERE table_name = 'EMPLOYEES'` (name in CAPITALS) |
 | Spark | `t["employees"].printSchema()` or `%%sql DESCRIBE employees` |

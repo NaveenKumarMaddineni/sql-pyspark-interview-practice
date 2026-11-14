@@ -71,11 +71,11 @@ res = spark.range(1, 11).withColumnRenamed("id", "n")""",
           bq="""
 WITH RECURSIVE r AS (
     SELECT emp_id, name, 1 AS lvl
-    FROM shield.employees
+    FROM practice.employees
     WHERE manager_id IS NULL
     UNION ALL
     SELECT e.emp_id, e.name, r.lvl + 1
-    FROM shield.employees e
+    FROM practice.employees e
     JOIN r ON e.manager_id = r.emp_id
 )
 SELECT emp_id, name, lvl FROM r ORDER BY lvl, emp_id""",
@@ -116,11 +116,11 @@ SELECT emp_id, name, lvl FROM r ORDER BY lvl, emp_id""",
           bq="""
 WITH RECURSIVE r AS (
     SELECT emp_id, name, name AS path
-    FROM shield.employees
+    FROM practice.employees
     WHERE manager_id IS NULL
     UNION ALL
     SELECT e.emp_id, e.name, r.path || ' > ' || e.name
-    FROM shield.employees e
+    FROM practice.employees e
     JOIN r ON e.manager_id = r.emp_id
 )
 SELECT emp_id, path FROM r ORDER BY path""",
@@ -158,10 +158,10 @@ SELECT emp_id, path FROM r ORDER BY path""",
           level="medium",
           bq="""
 WITH RECURSIVE r AS (
-    SELECT emp_id, name FROM shield.employees WHERE manager_id = 2
+    SELECT emp_id, name FROM practice.employees WHERE manager_id = 2
     UNION ALL
     SELECT e.emp_id, e.name
-    FROM shield.employees e
+    FROM practice.employees e
     JOIN r ON e.manager_id = r.emp_id
 )
 SELECT emp_id, name FROM r ORDER BY emp_id""",
@@ -203,13 +203,13 @@ res = found.orderBy("emp_id")""",
           bq="""
 WITH RECURSIVE up AS (
     SELECT 1 AS step, m.emp_id, m.name, m.manager_id
-    FROM shield.employees e
-    JOIN shield.employees m ON m.emp_id = e.manager_id
+    FROM practice.employees e
+    JOIN practice.employees m ON m.emp_id = e.manager_id
     WHERE e.emp_id = 7
     UNION ALL
     SELECT up.step + 1, m.emp_id, m.name, m.manager_id
     FROM up
-    JOIN shield.employees m ON m.emp_id = up.manager_id
+    JOIN practice.employees m ON m.emp_id = up.manager_id
 )
 SELECT step, emp_id, name FROM up ORDER BY step""",
           ora="""
@@ -256,16 +256,16 @@ res = spark.createDataFrame(rows, "step int, emp_id int, name string")""",
           bq="""
 WITH RECURSIVE pairs AS (
     SELECT manager_id AS boss, emp_id
-    FROM shield.employees
+    FROM practice.employees
     WHERE manager_id IS NOT NULL
     UNION ALL
     SELECT p.boss, e.emp_id
     FROM pairs p
-    JOIN shield.employees e ON e.manager_id = p.emp_id
+    JOIN practice.employees e ON e.manager_id = p.emp_id
 )
 SELECT p.boss AS manager_id, m.name, COUNT(*) AS team_size
 FROM pairs p
-JOIN shield.employees m ON m.emp_id = p.boss
+JOIN practice.employees m ON m.emp_id = p.boss
 GROUP BY p.boss, m.name
 ORDER BY team_size DESC, manager_id""",
           ora="""
@@ -321,10 +321,10 @@ res = (pairs.groupBy("boss").agg(F.count("*").alias("team_size"))
           level="medium",
           bq="""
 WITH RECURSIVE r AS (
-    SELECT emp_id, 1 AS lvl FROM shield.employees WHERE manager_id IS NULL
+    SELECT emp_id, 1 AS lvl FROM practice.employees WHERE manager_id IS NULL
     UNION ALL
     SELECT e.emp_id, r.lvl + 1
-    FROM shield.employees e
+    FROM practice.employees e
     JOIN r ON e.manager_id = r.emp_id
     WHERE r.lvl < 10
 )

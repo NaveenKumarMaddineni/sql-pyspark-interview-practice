@@ -45,7 +45,7 @@ MAGIC = {"bigquery": "%%bigquery", "oracle": "%%oracle", "spark": "%%sql"}
 def Q(title, text, level="medium", sql=None, bq=None, ora=None, ssql=None, sdf=None,
       note="", notes=None, setup=None, compare=True, ordered=False, hint=None, answer=None, df_first=False):
     """One question.
-    sql   : one SQL answer that works in all 3 engines (BigQuery gets `shield.` added)
+    sql   : one SQL answer that works in all 3 engines (BigQuery gets `practice.` added)
     bq / ora / ssql : engine-specific SQL (a string, or a list = several cells).
                       "SKIP" = this engine does not get the question.
     sdf   : PySpark DataFrame API answer. Must put the answer in a variable `res`.
@@ -83,9 +83,9 @@ def load_topics(filters):
 
 
 def add_dataset(sql):
-    """Generic SQL -> BigQuery SQL: FROM employees -> FROM shield.employees."""
+    """Generic SQL -> BigQuery SQL: FROM employees -> FROM practice.employees."""
     pattern = r"\b(FROM|JOIN|INTO|UPDATE|TABLE)\s+(" + "|".join(TABLES) + r")\b"
-    return re.sub(pattern, r"\1 shield.\2", sql, flags=re.IGNORECASE)
+    return re.sub(pattern, r"\1 practice.\2", sql, flags=re.IGNORECASE)
 
 
 def as_list(x):
@@ -311,7 +311,7 @@ def setup_cell(engine):
 
 
 HOW_TO = {
-    "bigquery": "Start each SQL cell with `%%bigquery`. Write tables as `shield.table_name`.\n"
+    "bigquery": "Start each SQL cell with `%%bigquery`. Write tables as `practice.table_name`.\n"
                 "Each cell prints how much data it read. `%%bigquery dry` checks the size for free.",
     "oracle": "Start each SQL cell with `%%oracle`. One statement per cell. "
               "Tables are in your own schema, so just write `employees`.",
@@ -362,9 +362,9 @@ def build(topics, runner):
         for e in topic["engines"]:
             head = (f"# {topic['title']} ({NAMES[e]})\n\n{topic['intro'].strip()}\n\n"
                     f"**How to run:** {HOW_TO[e]}\n\n"
-                    "Tables: see [tables_guide.md](../../jarvis/tables_guide.md). "
+                    "Tables: see [tables_guide.md](../../cheatsheets/tables_guide.md). "
                     "Run the setup cell first (Shift+Enter).")
-            sol_head = head.replace("../../jarvis", "../../jarvis") + \
+            sol_head = head.replace("../../cheatsheets", "../../cheatsheets") + \
                 "\n\n> **Solutions.** Try the practice notebook first: " \
                 f"[`{e}/practice/{topic['id']}.ipynb`](../../{e}/practice/{topic['id']}.ipynb)"
             if all(q["answer"] for q in topic["questions"]):     # theory quiz: no code
