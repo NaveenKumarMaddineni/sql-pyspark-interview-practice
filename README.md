@@ -97,9 +97,9 @@ Check Java: `java -version` should show 17 or 21. If Spark can't find Java, set 
 ```bash
 git clone https://github.com/<your-user>/<this-repo>.git
 cd <this-repo>
-python3 -m venv .venv              # a private Python environment for this project
+uv venv                            # a private Python environment for this project (.venv)
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+uv pip install -r requirements.txt # needs uv: brew install uv (https://docs.astral.sh/uv/)
 cp .env.example .env               # your personal settings; .env is never uploaded
 ```
 
@@ -119,7 +119,7 @@ image works on Intel and Apple Silicon.
 
 ```bash
 # macOS with Colima: start the Docker engine first (give Oracle enough memory)
-colima start --memory 4
+colima start --cpu 4 --memory 4
 
 # Create the database. Choose your own passwords.
 docker run -d --name oracle -p 1521:1521 \
