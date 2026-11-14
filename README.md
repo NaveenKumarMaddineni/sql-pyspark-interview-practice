@@ -216,6 +216,13 @@ Do not edit the generated notebooks by hand: the next build overwrites them.
 | BigQuery `Not found: Dataset` | run `python3 bigquery/load_tables.py`; check `BQ_LOCATION` |
 | `%%sql` / `%%oracle` unknown | run the setup cell first |
 
+## License
+
+- **Code** (the build tool, helpers and loaders): [MIT](LICENSE).
+- **Content** (questions, answers, explanations, notebooks, cheatsheets, practice data):
+  [CC BY-NC-SA 4.0](LICENSE-CONTENT). Free to use, share and adapt for non-commercial use, with credit.
+  Not for resale.
+
 ## Credits
 
 Built with [Claude Code](https://claude.com/claude-code).
